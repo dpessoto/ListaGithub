@@ -10,6 +10,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ListaGithub">
         <activity
+            android:name=".feature.listRepositories.ListRepositoriesActivity"
+            android:exported="true" />
+        <activity
             android:name=".util.view.BaseActivity"
             android:exported="true" />
         <activity
