@@ -24,7 +24,7 @@ fun Int.toFormat(): String {
             }
             else -> String.format("%.f", n) + suffix
         }
-        return String.format("%.2f", n) + suffix
+        return String.format("%.1f", n) + suffix
     } catch (e: Exception) {
         return this.toString()
     }
