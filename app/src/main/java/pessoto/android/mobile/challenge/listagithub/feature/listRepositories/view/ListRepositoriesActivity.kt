@@ -2,7 +2,6 @@ package pessoto.android.mobile.challenge.listagithub.feature.listRepositories.vi
 
 import android.os.Bundle
 import android.view.View
-import android.widget.AbsListView
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -13,6 +12,7 @@ import pessoto.android.mobile.challenge.listagithub.feature.listRepositories.vie
 import pessoto.android.mobile.challenge.listagithub.model.Items
 import pessoto.android.mobile.challenge.listagithub.model.Result
 import pessoto.android.mobile.challenge.listagithub.model.StateView
+import pessoto.android.mobile.challenge.listagithub.util.extensions.smoothSnapToPosition
 import pessoto.android.mobile.challenge.listagithub.util.view.BaseActivity
 
 class ListRepositoriesActivity : BaseActivity() {
@@ -78,12 +78,22 @@ class ListRepositoriesActivity : BaseActivity() {
                 totalItems = manager.itemCount
                 scrollOutItems = manager.findFirstVisibleItemPosition()
 
+                if (scrollOutItems > 5) {
+                    binding.fabUp.visibility = View.VISIBLE
+                } else {
+                    binding.fabUp.visibility = View.GONE
+                }
+
                 if ((currentItems + scrollOutItems > totalItems - 4) && next) {
                     next = false
                     viewModel.getRepositories("language:kotlin", page)
                 }
             }
         })
+
+        binding.fabUp.setOnClickListener {
+            binding.rcList.smoothSnapToPosition(0)
+        }
 
         viewModel.stateView.observe(this, observer)
         viewModel.getRepositories("language:kotlin", page)
