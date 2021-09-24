@@ -22,6 +22,7 @@ fun Int.toFormat(): String {
                 n /= 1000
                 suffix = "K"
             }
+            else -> String.format("%.f", n) + suffix
         }
         return String.format("%.2f", n) + suffix
     } catch (e: Exception) {
