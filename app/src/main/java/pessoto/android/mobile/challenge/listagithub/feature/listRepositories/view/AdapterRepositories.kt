@@ -10,6 +10,7 @@ import com.squareup.picasso.Callback
 import com.squareup.picasso.Picasso
 import pessoto.android.mobile.challenge.listagithub.databinding.AdapterRepositoriesBinding
 import pessoto.android.mobile.challenge.listagithub.model.Items
+import pessoto.android.mobile.challenge.listagithub.util.extensions.toFormat
 import kotlin.math.max
 
 class AdapterRepositories(var itemsList: ArrayList<Items>) :
@@ -22,6 +23,9 @@ class AdapterRepositories(var itemsList: ArrayList<Items>) :
 
             binding.apply {
                 txtNameRepository.text = item.fullName
+                txtLogin.text = item.owner.login
+                txtStars.text = item.stars.toFormat()
+                txtFork.text = item.forks.toFormat()
 
                 Picasso.get().load(item.owner.urlAvatar).into(imgAvatar, object : Callback {
                     override fun onSuccess() {

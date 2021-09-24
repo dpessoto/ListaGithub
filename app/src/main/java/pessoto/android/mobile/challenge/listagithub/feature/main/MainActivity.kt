@@ -15,6 +15,6 @@ class MainActivity : BaseActivity() {
         Handler().postDelayed({
             startActivity(Intent(this, ListRepositoriesActivity::class.java))
             finish()
-        }, 3000)
+        }, 1000)
     }
 }
