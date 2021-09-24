@@ -4,7 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import pessoto.android.mobile.challenge.listagithub.R
-import pessoto.android.mobile.challenge.listagithub.feature.listRepositories.ListRepositoriesActivity
+import pessoto.android.mobile.challenge.listagithub.feature.listRepositories.view.ListRepositoriesActivity
 import pessoto.android.mobile.challenge.listagithub.util.view.BaseActivity
 
 class MainActivity : BaseActivity() {

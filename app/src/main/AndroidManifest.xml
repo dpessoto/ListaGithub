@@ -2,6 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="pessoto.android.mobile.challenge.listagithub">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -10,7 +12,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ListaGithub">
         <activity
-            android:name=".feature.listRepositories.ListRepositoriesActivity"
+            android:name=".feature.listRepositories.view.ListRepositoriesActivity"
             android:exported="true" />
         <activity
             android:name=".util.view.BaseActivity"
