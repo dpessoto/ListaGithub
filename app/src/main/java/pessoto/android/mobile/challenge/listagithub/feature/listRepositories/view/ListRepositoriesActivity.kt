@@ -20,7 +20,6 @@ class ListRepositoriesActivity : BaseActivity() {
     private lateinit var binding: ActivityListRepositoriesBinding
     private var listRepositories = ArrayList<Items>()
     private var page = 1
-    var isScrolling = false
     var next = true
     var currentItems = 0
     var totalItems = 0
@@ -52,11 +51,11 @@ class ListRepositoriesActivity : BaseActivity() {
                 page++
                 next = true
                 listRepositories.addAll(stateView.data.items)
-
                 adapterRepositories.notifyDataSetChanged()
             }
             is StateView.Error -> {
                 binding.progressBar.visibility = View.GONE
+                next = true
             }
         }
     }
@@ -73,21 +72,13 @@ class ListRepositoriesActivity : BaseActivity() {
         }
 
         binding.rcList.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-                super.onScrollStateChanged(recyclerView, newState)
-                if (newState == AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL) {
-                    isScrolling = true
-                }
-            }
-
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
                 currentItems = manager.childCount
                 totalItems = manager.itemCount
                 scrollOutItems = manager.findFirstVisibleItemPosition()
 
-                if ((currentItems + scrollOutItems > totalItems - 4) && next && isScrolling) {
-                    isScrolling = false
+                if ((currentItems + scrollOutItems > totalItems - 4) && next) {
                     next = false
                     viewModel.getRepositories("language:kotlin", page)
                 }
