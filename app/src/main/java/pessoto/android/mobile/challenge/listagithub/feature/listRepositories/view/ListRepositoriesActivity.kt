@@ -25,7 +25,7 @@ class ListRepositoriesActivity : BaseActivity() {
     var totalItems = 0
     var scrollOutItems = 0
 
-    private val manager : LinearLayoutManager by lazy {
+    private val manager: LinearLayoutManager by lazy {
         LinearLayoutManager(this)
     }
 
@@ -96,7 +96,24 @@ class ListRepositoriesActivity : BaseActivity() {
         }
 
         viewModel.stateView.observe(this, observer)
-        viewModel.getRepositories("language:kotlin", page)
+
+        if (savedInstanceState != null && savedInstanceState.containsKey("scrollOutItems")) {
+            page = savedInstanceState.getInt("page")
+            listRepositories.addAll(savedInstanceState.getSerializable("repositories") as ArrayList<Items>)
+            adapterRepositories.notifyDataSetChanged()
+            binding.rcList.smoothSnapToPosition(savedInstanceState.getInt("toPosition"))
+            binding.fabUp.visibility = savedInstanceState.getInt("fab")
+        } else {
+            viewModel.getRepositories("language:kotlin", page)
+        }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putInt("toPosition", scrollOutItems)
+        outState.putInt("page", page)
+        outState.putSerializable("repositories", listRepositories)
+        outState.putInt("fab", binding.fabUp.visibility)
     }
 
     override fun onStop() {
