@@ -5,6 +5,7 @@ import android.view.View
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.snackbar.Snackbar
 import pessoto.android.mobile.challenge.listagithub.databinding.ActivityListRepositoriesBinding
 import pessoto.android.mobile.challenge.listagithub.feature.listRepositories.repository.ListRepositoriesRepository
 import pessoto.android.mobile.challenge.listagithub.feature.listRepositories.repository.ListRepositoriesRepositoryImpl
@@ -14,6 +15,9 @@ import pessoto.android.mobile.challenge.listagithub.model.Result
 import pessoto.android.mobile.challenge.listagithub.model.StateView
 import pessoto.android.mobile.challenge.listagithub.util.extensions.smoothSnapToPosition
 import pessoto.android.mobile.challenge.listagithub.util.view.BaseActivity
+import pessoto.android.mobile.challenge.listagithub.util.view.Dialogs
+import pessoto.android.mobile.challenge.listagithub.util.view.DialogsCallback
+import java.net.UnknownHostException
 
 class ListRepositoriesActivity : BaseActivity() {
 
@@ -24,6 +28,7 @@ class ListRepositoriesActivity : BaseActivity() {
     var currentItems = 0
     var totalItems = 0
     var scrollOutItems = 0
+    var language = "kotlin"
 
     private val manager: LinearLayoutManager by lazy {
         LinearLayoutManager(this)
@@ -41,6 +46,17 @@ class ListRepositoriesActivity : BaseActivity() {
         AdapterRepositories(listRepositories)
     }
 
+    private val callbackDialog = object :
+        DialogsCallback {
+        override fun callbackPositiveClick() {
+            viewModel.getRepositories(language, page)
+        }
+
+        override fun callbackNegativeClick() {
+            finish()
+        }
+    }
+
     private val observer = Observer<StateView<Result>> { stateView ->
         when (stateView) {
             is StateView.Loading -> {
@@ -56,6 +72,17 @@ class ListRepositoriesActivity : BaseActivity() {
             is StateView.Error -> {
                 binding.progressBar.visibility = View.GONE
                 next = true
+
+                when (stateView.e) {
+                    is UnknownHostException -> {
+                        if (listRepositories.isEmpty()) {
+                            showDialog("Sem conexão com a internet!")
+                        } else {
+                            Snackbar.make(binding.textView2, "Não foi possível atualizar a lista", Snackbar.LENGTH_SHORT).show()
+                        }
+                    }
+                    else -> showDialog("Ocorreu um erro inesperado!")
+                }
             }
         }
     }
@@ -86,7 +113,7 @@ class ListRepositoriesActivity : BaseActivity() {
 
                 if ((currentItems + scrollOutItems > totalItems - 4) && next) {
                     next = false
-                    viewModel.getRepositories("language:kotlin", page)
+                    viewModel.getRepositories(language, page)
                 }
             }
         })
@@ -104,7 +131,7 @@ class ListRepositoriesActivity : BaseActivity() {
             binding.rcList.smoothSnapToPosition(savedInstanceState.getInt("toPosition"))
             binding.fabUp.visibility = savedInstanceState.getInt("fab")
         } else {
-            viewModel.getRepositories("language:kotlin", page)
+            viewModel.getRepositories(language, page)
         }
     }
 
@@ -119,5 +146,16 @@ class ListRepositoriesActivity : BaseActivity() {
     override fun onStop() {
         super.onStop()
         viewModel.stateView.removeObserver(observer)
+        Dialogs.cancelDialog()
     }
+
+    private fun showDialog(message: String) = Dialogs.showDialog(
+        context = this,
+        title = "Ops",
+        message = message,
+        positiveButton = "Tentar novamente",
+        negativeButton = "Fechar",
+        cancelable = false,
+        callback = callbackDialog
+    )
 }
