@@ -58,6 +58,9 @@ dependencies {
     //Dependencia do GSON
     implementation "com.google.code.gson:gson:$versionGson"
 
+    //Dependencia picasso
+    implementation "com.squareup.picasso:picasso:$versionPicasso"
+
     testImplementation "junit:junit:$versionJUnit"
     androidTestImplementation "androidx.test.ext:junit:$versionAndroidXJUnit"
     androidTestImplementation "androidx.test.espresso:espresso-core:$versionExpresso"

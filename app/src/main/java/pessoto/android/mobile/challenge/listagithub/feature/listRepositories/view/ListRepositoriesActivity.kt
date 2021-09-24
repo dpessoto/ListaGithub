@@ -89,13 +89,13 @@ class ListRepositoriesActivity : BaseActivity() {
                 if ((currentItems + scrollOutItems > totalItems - 4) && next && isScrolling) {
                     isScrolling = false
                     next = false
-                    viewModel.getRepositories("kotlin", page)
+                    viewModel.getRepositories("language:kotlin", page)
                 }
             }
         })
 
         viewModel.stateView.observe(this, observer)
-        viewModel.getRepositories("kotlin", page)
+        viewModel.getRepositories("language:kotlin", page)
     }
 
     override fun onStop() {

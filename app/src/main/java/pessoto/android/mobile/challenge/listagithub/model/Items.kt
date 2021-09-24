@@ -5,5 +5,6 @@ import java.io.Serializable
 
 data class Items(
     @SerializedName("full_name") val fullName: String,
-    @SerializedName("description") val description: String
+    @SerializedName("description") val description: String,
+    @SerializedName("owner") val owner: Owner
 ) : Serializable
