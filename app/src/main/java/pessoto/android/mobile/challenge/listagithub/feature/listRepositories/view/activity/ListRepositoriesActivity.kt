@@ -71,6 +71,7 @@ class ListRepositoriesActivity : BaseActivity() {
                 binding.clError.visibility = View.GONE
                 binding.btnTryAgain.visibility = View.GONE
                 binding.rcList.visibility = View.VISIBLE
+                binding.editTextSearch.visibility = View.VISIBLE
 
                 page++
                 next = true
@@ -188,8 +189,24 @@ class ListRepositoriesActivity : BaseActivity() {
                                 fullName.contains(textLowerCase) || login.contains(textLowerCase)
                             })
                         }
+
+                        if (listRepositoriesChanged.isEmpty()) {
+                            binding.rcList.visibility = View.GONE
+                            binding.btnTryAgain.visibility = View.GONE
+                            binding.clError.visibility = View.VISIBLE
+                            binding.txtMessage.visibility = View.VISIBLE
+                            binding.txtMessage.text = "Nenhum repositório encontrado!"
+                        } else {
+                            binding.rcList.visibility = View.VISIBLE
+                            binding.clError.visibility = View.GONE
+                            binding.txtMessage.visibility = View.GONE
+                        }
+
                     } else {
                         next = true
+                        binding.rcList.visibility = View.VISIBLE
+                        binding.clError.visibility = View.GONE
+                        binding.txtMessage.visibility = View.GONE
                         listRepositoriesChanged.clear()
                         listRepositoriesChanged.addAll(listRepositoriesNotChanged)
                     }
@@ -210,6 +227,7 @@ class ListRepositoriesActivity : BaseActivity() {
             binding.rcList.smoothSnapToPosition(savedInstanceState.getInt("toPosition"))
             binding.fabUp.visibility = savedInstanceState.getInt("fab")
             binding.rcList.visibility = View.VISIBLE
+            binding.editTextSearch.visibility = View.VISIBLE
         } else {
             viewModel.getRepositories(language, page)
         }
