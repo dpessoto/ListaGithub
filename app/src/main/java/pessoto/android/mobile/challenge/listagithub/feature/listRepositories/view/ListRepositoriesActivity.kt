@@ -1,6 +1,8 @@
 package pessoto.android.mobile.challenge.listagithub.feature.listRepositories.view
 
+import android.annotation.SuppressLint
 import android.os.Bundle
+import android.os.Handler
 import android.view.View
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -16,7 +18,6 @@ import pessoto.android.mobile.challenge.listagithub.model.StateView
 import pessoto.android.mobile.challenge.listagithub.util.extensions.smoothSnapToPosition
 import pessoto.android.mobile.challenge.listagithub.util.view.BaseActivity
 import pessoto.android.mobile.challenge.listagithub.util.view.Dialogs
-import pessoto.android.mobile.challenge.listagithub.util.view.DialogsCallback
 import java.net.UnknownHostException
 
 class ListRepositoriesActivity : BaseActivity() {
@@ -24,6 +25,7 @@ class ListRepositoriesActivity : BaseActivity() {
     private lateinit var binding: ActivityListRepositoriesBinding
     private var listRepositories = ArrayList<Items>()
     private var page = 1
+    var showError = true
     var next = true
     var currentItems = 0
     var totalItems = 0
@@ -46,24 +48,27 @@ class ListRepositoriesActivity : BaseActivity() {
         AdapterRepositories(listRepositories)
     }
 
-    private val callbackDialog = object :
-        DialogsCallback {
-        override fun callbackPositiveClick() {
-            viewModel.getRepositories(language, page)
-        }
-
-        override fun callbackNegativeClick() {
-            finish()
-        }
-    }
-
     private val observer = Observer<StateView<Result>> { stateView ->
         when (stateView) {
             is StateView.Loading -> {
-                binding.progressBar.visibility = View.VISIBLE
+                if (listRepositories.isEmpty()) {
+                    binding.clError.visibility = View.VISIBLE
+                    binding.progressBarMessage.visibility = View.VISIBLE
+                    binding.txtMessage.text =
+                        "Carregando lista de repositórios!\nAguarde por favor..."
+                } else {
+                    binding.progressBar.visibility = View.VISIBLE
+                    binding.clError.visibility = View.GONE
+                }
+                binding.btnTryAgain.visibility = View.GONE
             }
             is StateView.DataLoaded -> {
                 binding.progressBar.visibility = View.GONE
+                binding.progressBarMessage.visibility = View.GONE
+                binding.clError.visibility = View.GONE
+                binding.btnTryAgain.visibility = View.GONE
+                binding.rcList.visibility = View.VISIBLE
+
                 page++
                 next = true
                 listRepositories.addAll(stateView.data.items)
@@ -71,22 +76,60 @@ class ListRepositoriesActivity : BaseActivity() {
             }
             is StateView.Error -> {
                 binding.progressBar.visibility = View.GONE
+                binding.progressBarMessage.visibility = View.GONE
+                binding.btnTryAgain.visibility = View.GONE
+
                 next = true
 
                 when (stateView.e) {
                     is UnknownHostException -> {
                         if (listRepositories.isEmpty()) {
-                            showDialog("Sem conexão com a internet!")
-                        } else {
-                            Snackbar.make(binding.textView2, "Não foi possível atualizar a lista", Snackbar.LENGTH_SHORT).show()
+                            binding.txtMessage.text =
+                                "Nenhum repostirório encontrado.\nVerifique sua conexão e tente novamente."
+                            binding.clError.visibility = View.VISIBLE
+                            binding.btnTryAgain.visibility = View.VISIBLE
+
+                        } else if (showError) {
+                            Snackbar.make(
+                                binding.rcList,
+                                "Verifique sua conexão, por favor",
+                                Snackbar.LENGTH_SHORT
+                            ).show()
+
+                            showError = false
+
+                            Handler().postDelayed({
+                                showError = true
+                            }, 3000)
                         }
                     }
-                    else -> showDialog("Ocorreu um erro inesperado!")
+                    else -> {
+                        if (listRepositories.isEmpty()) {
+                            binding.txtMessage.text =
+                                "Ocorreu um erro inesperado.\nPor favor, tente novamente."
+                            binding.clError.visibility = View.VISIBLE
+                            binding.btnTryAgain.visibility = View.VISIBLE
+
+                        } else if (showError) {
+                            Snackbar.make(
+                                binding.rcList,
+                                "Não foi possível atualizar a lista",
+                                Snackbar.LENGTH_SHORT
+                            ).show()
+
+                            showError = false
+
+                            Handler().postDelayed({
+                                showError = true
+                            }, 3000)
+                        }
+                    }
                 }
             }
         }
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityListRepositoriesBinding.inflate(layoutInflater)
@@ -118,18 +161,23 @@ class ListRepositoriesActivity : BaseActivity() {
             }
         })
 
+        binding.btnTryAgain.setOnClickListener {
+            viewModel.getRepositories(language, page)
+        }
+
         binding.fabUp.setOnClickListener {
             binding.rcList.smoothSnapToPosition(0)
         }
 
         viewModel.stateView.observe(this, observer)
 
-        if (savedInstanceState != null && savedInstanceState.containsKey("scrollOutItems")) {
+        if (savedInstanceState != null && savedInstanceState.containsKey("repositories") && (savedInstanceState.getSerializable("repositories") as ArrayList<Items>).isNotEmpty()) {
             page = savedInstanceState.getInt("page")
             listRepositories.addAll(savedInstanceState.getSerializable("repositories") as ArrayList<Items>)
             adapterRepositories.notifyDataSetChanged()
             binding.rcList.smoothSnapToPosition(savedInstanceState.getInt("toPosition"))
             binding.fabUp.visibility = savedInstanceState.getInt("fab")
+            binding.rcList.visibility = View.VISIBLE
         } else {
             viewModel.getRepositories(language, page)
         }
@@ -137,10 +185,12 @@ class ListRepositoriesActivity : BaseActivity() {
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        outState.putInt("toPosition", scrollOutItems)
-        outState.putInt("page", page)
-        outState.putSerializable("repositories", listRepositories)
-        outState.putInt("fab", binding.fabUp.visibility)
+        if (listRepositories.isNotEmpty()) {
+            outState.putInt("toPosition", scrollOutItems)
+            outState.putInt("page", page)
+            outState.putSerializable("repositories", listRepositories)
+            outState.putInt("fab", binding.fabUp.visibility)
+        }
     }
 
     override fun onStop() {
@@ -149,13 +199,4 @@ class ListRepositoriesActivity : BaseActivity() {
         Dialogs.cancelDialog()
     }
 
-    private fun showDialog(message: String) = Dialogs.showDialog(
-        context = this,
-        title = "Ops",
-        message = message,
-        positiveButton = "Tentar novamente",
-        negativeButton = "Fechar",
-        cancelable = false,
-        callback = callbackDialog
-    )
 }
