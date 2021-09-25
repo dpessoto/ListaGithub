@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
 import pessoto.android.mobile.challenge.listagithub.databinding.ActivityListRepositoriesBinding
+import pessoto.android.mobile.challenge.listagithub.feature.listRepositories.dialog.ListRepositoriesDialog
 import pessoto.android.mobile.challenge.listagithub.feature.listRepositories.repository.ListRepositoriesRepository
 import pessoto.android.mobile.challenge.listagithub.feature.listRepositories.repository.ListRepositoriesRepositoryImpl
 import pessoto.android.mobile.challenge.listagithub.feature.listRepositories.view.adapter.AdapterRepositories
@@ -25,6 +26,8 @@ import java.net.UnknownHostException
 
 class ListRepositoriesActivity : BaseActivity() {
 
+    private val PREFS_NAME = "pessoto.android.mobile.challenge.listagithub.showDialog"
+    private val PREF_PREFIX_KEY = "showDialog"
     private lateinit var binding: ActivityListRepositoriesBinding
     private var listRepositoriesNotChanged = ArrayList<Items>()
     private var listRepositoriesChanged = ArrayList<Items>()
@@ -234,6 +237,11 @@ class ListRepositoriesActivity : BaseActivity() {
         } else {
             viewModel.getRepositories(language, page)
         }
+
+        if (getShowDialogPref()) {
+            ListRepositoriesDialog.showDialog(this)
+            saveShowDialogPref()
+        }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -249,7 +257,17 @@ class ListRepositoriesActivity : BaseActivity() {
     override fun onStop() {
         super.onStop()
         viewModel.stateView.removeObserver(observer)
-        Dialogs.cancelDialog()
+    }
+
+    private fun saveShowDialogPref() {
+        val prefs = this.getSharedPreferences(PREFS_NAME, 0).edit()
+        prefs.putBoolean(PREF_PREFIX_KEY, false)
+        prefs.apply()
+    }
+
+    private fun getShowDialogPref(): Boolean {
+        val prefs = this.getSharedPreferences(PREFS_NAME, 0)
+        return prefs.getBoolean(PREF_PREFIX_KEY, true)
     }
 
 }
