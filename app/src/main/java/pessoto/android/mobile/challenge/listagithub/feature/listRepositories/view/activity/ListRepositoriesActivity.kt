@@ -1,6 +1,8 @@
 package pessoto.android.mobile.challenge.listagithub.feature.listRepositories.view.activity
 
 import android.annotation.SuppressLint
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.view.View
@@ -18,7 +20,6 @@ import pessoto.android.mobile.challenge.listagithub.model.Result
 import pessoto.android.mobile.challenge.listagithub.model.StateView
 import pessoto.android.mobile.challenge.listagithub.util.extensions.smoothSnapToPosition
 import pessoto.android.mobile.challenge.listagithub.util.view.BaseActivity
-import pessoto.android.mobile.challenge.listagithub.util.view.Dialogs
 import pessoto.android.mobile.challenge.listagithub.util.view.components.EditTextSearch
 import java.net.UnknownHostException
 
@@ -28,7 +29,6 @@ class ListRepositoriesActivity : BaseActivity() {
     private var listRepositoriesNotChanged = ArrayList<Items>()
     private var listRepositoriesChanged = ArrayList<Items>()
     private var page = 1
-    var showError = true
     var next = true
     var currentItems = 0
     var totalItems = 0
@@ -48,7 +48,10 @@ class ListRepositoriesActivity : BaseActivity() {
     }
 
     private val adapterRepositories by lazy {
-        AdapterRepositories(listRepositoriesChanged)
+        AdapterRepositories(listRepositoriesChanged, { itemOnClick -> }, { itemLongClick ->
+            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(itemLongClick.urlRepository)))
+            return@AdapterRepositories true
+        })
     }
 
     private val observer = Observer<StateView<Result>> { stateView ->
@@ -94,17 +97,17 @@ class ListRepositoriesActivity : BaseActivity() {
                             binding.clError.visibility = View.VISIBLE
                             binding.btnTryAgain.visibility = View.VISIBLE
 
-                        } else if (showError) {
+                        } else {
                             Snackbar.make(
                                 binding.rcList,
                                 "Verifique sua conexão, por favor",
                                 Snackbar.LENGTH_SHORT
                             ).show()
 
-                            showError = false
+                            next = false
 
                             Handler().postDelayed({
-                                showError = true
+                                next = true
                             }, 3000)
                         }
                     }
@@ -115,17 +118,17 @@ class ListRepositoriesActivity : BaseActivity() {
                             binding.clError.visibility = View.VISIBLE
                             binding.btnTryAgain.visibility = View.VISIBLE
 
-                        } else if (showError) {
+                        } else {
                             Snackbar.make(
                                 binding.rcList,
                                 "Não foi possível atualizar a lista",
                                 Snackbar.LENGTH_SHORT
                             ).show()
 
-                            showError = false
+                            next = false
 
                             Handler().postDelayed({
-                                showError = true
+                                next = true
                             }, 3000)
                         }
                     }
@@ -178,7 +181,7 @@ class ListRepositoriesActivity : BaseActivity() {
             object : EditTextSearch.AddTextChangedListener {
                 @SuppressLint("DefaultLocale")
                 override fun textChanged(text: String) {
-                   val textLowerCase = text.toLowerCase()
+                    val textLowerCase = text.toLowerCase()
                     if (text.isNotEmpty()) {
                         next = false
                         listRepositoriesChanged.clear()

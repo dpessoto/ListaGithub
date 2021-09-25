@@ -8,5 +8,6 @@ data class Items(
     @SerializedName("description") val description: String,
     @SerializedName("owner") val owner: Owner,
     @SerializedName("stargazers_count") val stars: Int,
-    @SerializedName("forks") val forks: Int
+    @SerializedName("forks") val forks: Int,
+    @SerializedName("html_url") val urlRepository: String
 ) : Serializable

@@ -13,13 +13,26 @@ import pessoto.android.mobile.challenge.listagithub.model.Items
 import pessoto.android.mobile.challenge.listagithub.util.extensions.toFormat
 import kotlin.math.max
 
-class AdapterRepositories(var itemsList: ArrayList<Items>) :
+class AdapterRepositories(
+    var itemsList: ArrayList<Items>,
+    private val onClick: (Items) -> Unit,
+    private val onLongClick: (Items) -> Boolean
+
+) :
     RecyclerView.Adapter<AdapterRepositories.ViewHolder>() {
 
     inner class ViewHolder(
         private val binding: AdapterRepositoriesBinding,
     ) : RecyclerView.ViewHolder(binding.root) {
         fun bind(item: Items, position: Int) {
+
+            binding.root.setOnClickListener {
+                onClick(item)
+            }
+
+            binding.root.setOnLongClickListener {
+                onLongClick(item)
+            }
 
             binding.apply {
                 txtNameRepository.text = item.fullName
