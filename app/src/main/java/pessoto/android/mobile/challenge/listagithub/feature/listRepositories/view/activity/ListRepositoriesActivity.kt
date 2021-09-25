@@ -19,12 +19,14 @@ import pessoto.android.mobile.challenge.listagithub.model.StateView
 import pessoto.android.mobile.challenge.listagithub.util.extensions.smoothSnapToPosition
 import pessoto.android.mobile.challenge.listagithub.util.view.BaseActivity
 import pessoto.android.mobile.challenge.listagithub.util.view.Dialogs
+import pessoto.android.mobile.challenge.listagithub.util.view.components.EditTextSearch
 import java.net.UnknownHostException
 
 class ListRepositoriesActivity : BaseActivity() {
 
     private lateinit var binding: ActivityListRepositoriesBinding
-    private var listRepositories = ArrayList<Items>()
+    private var listRepositoriesNotChanged = ArrayList<Items>()
+    private var listRepositoriesChanged = ArrayList<Items>()
     private var page = 1
     var showError = true
     var next = true
@@ -46,13 +48,13 @@ class ListRepositoriesActivity : BaseActivity() {
     }
 
     private val adapterRepositories by lazy {
-        AdapterRepositories(listRepositories)
+        AdapterRepositories(listRepositoriesChanged)
     }
 
     private val observer = Observer<StateView<Result>> { stateView ->
         when (stateView) {
             is StateView.Loading -> {
-                if (listRepositories.isEmpty()) {
+                if (listRepositoriesNotChanged.isEmpty()) {
                     binding.clError.visibility = View.VISIBLE
                     binding.progressBarMessage.visibility = View.VISIBLE
                     binding.txtMessage.text =
@@ -72,7 +74,8 @@ class ListRepositoriesActivity : BaseActivity() {
 
                 page++
                 next = true
-                listRepositories.addAll(stateView.data.items)
+                listRepositoriesNotChanged.addAll(stateView.data.items)
+                listRepositoriesChanged.addAll(stateView.data.items)
                 adapterRepositories.notifyDataSetChanged()
             }
             is StateView.Error -> {
@@ -84,7 +87,7 @@ class ListRepositoriesActivity : BaseActivity() {
 
                 when (stateView.e) {
                     is UnknownHostException -> {
-                        if (listRepositories.isEmpty()) {
+                        if (listRepositoriesNotChanged.isEmpty()) {
                             binding.txtMessage.text =
                                 "Nenhum repostirório encontrado.\nVerifique sua conexão e tente novamente."
                             binding.clError.visibility = View.VISIBLE
@@ -105,7 +108,7 @@ class ListRepositoriesActivity : BaseActivity() {
                         }
                     }
                     else -> {
-                        if (listRepositories.isEmpty()) {
+                        if (listRepositoriesNotChanged.isEmpty()) {
                             binding.txtMessage.text =
                                 "Ocorreu um erro inesperado.\nPor favor, tente novamente."
                             binding.clError.visibility = View.VISIBLE
@@ -170,11 +173,39 @@ class ListRepositoriesActivity : BaseActivity() {
             binding.rcList.smoothSnapToPosition(0)
         }
 
+        binding.editTextSearch.addTextChangedListener =
+            object : EditTextSearch.AddTextChangedListener {
+                @SuppressLint("DefaultLocale")
+                override fun textChanged(text: String) {
+                   val textLowerCase = text.toLowerCase()
+                    if (text.isNotEmpty()) {
+                        next = false
+                        listRepositoriesChanged.clear()
+                        listRepositoriesChanged.apply {
+                            addAll(listRepositoriesNotChanged.filter { items ->
+                                val fullName = items.fullName.toLowerCase()
+                                val login = items.owner.login.toLowerCase()
+                                fullName.contains(textLowerCase) || login.contains(textLowerCase)
+                            })
+                        }
+                    } else {
+                        next = true
+                        listRepositoriesChanged.clear()
+                        listRepositoriesChanged.addAll(listRepositoriesNotChanged)
+                    }
+                    adapterRepositories.notifyDataSetChanged()
+                }
+            }
+
         viewModel.stateView.observe(this, observer)
 
-        if (savedInstanceState != null && savedInstanceState.containsKey("repositories") && (savedInstanceState.getSerializable("repositories") as ArrayList<Items>).isNotEmpty()) {
+        if (savedInstanceState != null && savedInstanceState.containsKey("repositories") && (savedInstanceState.getSerializable(
+                "repositories"
+            ) as ArrayList<Items>).isNotEmpty()
+        ) {
             page = savedInstanceState.getInt("page")
-            listRepositories.addAll(savedInstanceState.getSerializable("repositories") as ArrayList<Items>)
+            listRepositoriesNotChanged.addAll(savedInstanceState.getSerializable("repositories") as ArrayList<Items>)
+            listRepositoriesChanged.addAll(listRepositoriesNotChanged)
             adapterRepositories.notifyDataSetChanged()
             binding.rcList.smoothSnapToPosition(savedInstanceState.getInt("toPosition"))
             binding.fabUp.visibility = savedInstanceState.getInt("fab")
@@ -186,10 +217,10 @@ class ListRepositoriesActivity : BaseActivity() {
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        if (listRepositories.isNotEmpty()) {
+        if (listRepositoriesNotChanged.isNotEmpty()) {
             outState.putInt("toPosition", scrollOutItems)
             outState.putInt("page", page)
-            outState.putSerializable("repositories", listRepositories)
+            outState.putSerializable("repositories", listRepositoriesNotChanged)
             outState.putInt("fab", binding.fabUp.visibility)
         }
     }
