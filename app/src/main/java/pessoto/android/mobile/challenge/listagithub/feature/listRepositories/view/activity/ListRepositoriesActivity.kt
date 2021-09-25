@@ -1,4 +1,4 @@
-package pessoto.android.mobile.challenge.listagithub.feature.listRepositories.view
+package pessoto.android.mobile.challenge.listagithub.feature.listRepositories.view.activity
 
 import android.annotation.SuppressLint
 import android.os.Bundle
@@ -11,6 +11,7 @@ import com.google.android.material.snackbar.Snackbar
 import pessoto.android.mobile.challenge.listagithub.databinding.ActivityListRepositoriesBinding
 import pessoto.android.mobile.challenge.listagithub.feature.listRepositories.repository.ListRepositoriesRepository
 import pessoto.android.mobile.challenge.listagithub.feature.listRepositories.repository.ListRepositoriesRepositoryImpl
+import pessoto.android.mobile.challenge.listagithub.feature.listRepositories.view.adapter.AdapterRepositories
 import pessoto.android.mobile.challenge.listagithub.feature.listRepositories.viewModel.ListRepositoriesViewModel
 import pessoto.android.mobile.challenge.listagithub.model.Items
 import pessoto.android.mobile.challenge.listagithub.model.Result

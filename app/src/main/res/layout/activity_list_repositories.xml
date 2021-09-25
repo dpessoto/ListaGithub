@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#EFEFEF"
-    tools:context=".feature.listRepositories.view.ListRepositoriesActivity">
+    tools:context=".feature.listRepositories.view.activity.ListRepositoriesActivity">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rcList"

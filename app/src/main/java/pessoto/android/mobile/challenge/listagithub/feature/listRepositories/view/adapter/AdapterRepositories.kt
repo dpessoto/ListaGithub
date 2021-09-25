@@ -1,4 +1,4 @@
-package pessoto.android.mobile.challenge.listagithub.feature.listRepositories.view
+package pessoto.android.mobile.challenge.listagithub.feature.listRepositories.view.adapter
 
 import android.graphics.drawable.BitmapDrawable
 import android.view.LayoutInflater
