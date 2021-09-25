@@ -1,6 +1,7 @@
 package pessoto.android.mobile.challenge.listagithub.util.view
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.ViewGroup
@@ -36,6 +37,11 @@ open class BaseActivity : AppCompatActivity() {
                 (window.decorView as ViewGroup).addView(layout)
         } catch (e: Exception) {
         }
+    }
+
+    override fun startActivity(intent: Intent?) {
+        super.startActivity(intent)
+        goingToBackground = false
     }
 
     override fun finish() {

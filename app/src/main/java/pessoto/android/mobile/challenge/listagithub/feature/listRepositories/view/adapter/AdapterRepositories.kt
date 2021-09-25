@@ -24,7 +24,7 @@ class AdapterRepositories(
     inner class ViewHolder(
         private val binding: AdapterRepositoriesBinding,
     ) : RecyclerView.ViewHolder(binding.root) {
-        fun bind(item: Items, position: Int) {
+        fun bind(item: Items) {
 
             binding.root.setOnClickListener {
                 onClick(item)
@@ -69,7 +69,7 @@ class AdapterRepositories(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = itemsList[position]
-        holder.bind(item, position)
+        holder.bind(item)
     }
 
     override fun getItemCount(): Int {
