@@ -13,6 +13,7 @@
         android:theme="@style/Theme.ListaGithub">
         <activity
             android:name=".feature.listRepositories.view.activity.ListRepositoriesActivity"
+            android:configChanges="orientation|screenSize"
             android:exported="true" />
         <activity
             android:name=".util.view.BaseActivity"

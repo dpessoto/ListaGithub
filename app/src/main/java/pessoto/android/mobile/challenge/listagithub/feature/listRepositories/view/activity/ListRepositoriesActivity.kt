@@ -29,7 +29,7 @@ import java.util.*
 import kotlin.collections.ArrayList
 
 
-@SuppressLint( "NotifyDataSetChanged")
+@SuppressLint("NotifyDataSetChanged")
 class ListRepositoriesActivity : BaseActivity() {
 
     private lateinit var binding: ActivityListRepositoriesBinding
@@ -79,19 +79,15 @@ class ListRepositoriesActivity : BaseActivity() {
 
     private fun stateLoading() {
         if (listRepositoriesNotChanged.isEmpty()) {
-            showCardError(message = "Carregando lista de repositórios!\nAguarde por favor...", visibilityTryAgain = View.GONE)
+            showCardError(message = "Carregando lista de repositórios!\nAguarde por favor...", visibilityProgressBar = View.VISIBLE)
         } else {
-            binding.progressBar.visibility = View.VISIBLE
             binding.clError.visibility = View.GONE
         }
         binding.btnTryAgain.visibility = View.GONE
     }
 
     private fun stateDataLoaded(stateView: StateView.DataLoaded<Result>) {
-        binding.progressBar.visibility = View.GONE
-        binding.progressBarMessage.visibility = View.GONE
         binding.clError.visibility = View.GONE
-        binding.btnTryAgain.visibility = View.GONE
         binding.rcList.visibility = View.VISIBLE
         binding.editTextSearch.visibility = View.VISIBLE
 
@@ -105,29 +101,19 @@ class ListRepositoriesActivity : BaseActivity() {
     }
 
     private fun stateError(stateView: StateView.Error) {
-        binding.progressBar.visibility = View.GONE
-        binding.progressBarMessage.visibility = View.GONE
-        binding.btnTryAgain.visibility = View.GONE
-
         next = true
 
         when (stateView.e) {
             is UnknownHostException -> {
                 if (listRepositoriesNotChanged.isEmpty()) {
-                    showCardError(
-                        message = "Nenhum repositirório encontrado.\nVerifique sua conexão e tente novamente.",
-                        visibilityProgressBar = View.GONE
-                    )
+                    showCardError(message = "Nenhum repositirório encontrado.\nVerifique sua conexão e tente novamente.", visibilityTryAgain = View.VISIBLE)
                 } else {
                     showSnackBar("Verifique sua conexão, por favor")
                 }
             }
             else -> {
                 if (listRepositoriesNotChanged.isEmpty()) {
-                    showCardError(
-                        "Ocorreu um erro inesperado.\nPor favor, tente novamente.",
-                        View.GONE
-                    )
+                    showCardError(message = "Ocorreu um erro inesperado.\nPor favor, tente novamente.", visibilityTryAgain = View.VISIBLE)
                 } else {
                     showSnackBar("Não foi possível atualizar a lista", Gravity.BOTTOM)
                 }
@@ -147,8 +133,7 @@ class ListRepositoriesActivity : BaseActivity() {
         binding.editTextSearch.addTextChangedListener = addTextChangedListener()
 
         viewModel.stateView.observe(this, observer)
-
-        verifySavedInstanceState(savedInstanceState)
+        viewModel.getRepositories(language, page)
         verifySharedPreferences()
     }
 
@@ -168,10 +153,20 @@ class ListRepositoriesActivity : BaseActivity() {
 
                     if ((currentItems + scrollOutItems > totalItems - 4) && next) {
                         next = false
+                        addShowLoading()
                         viewModel.getRepositories(language, page)
                     }
                 }
             })
+        }
+    }
+
+    private fun addShowLoading() {
+        val last = listRepositoriesChanged.last().copy()
+        if (!last.showLoading) {
+            last.showLoading = true
+            listRepositoriesChanged.add(last)
+            adapterRepositories.notifyDataSetChanged()
         }
     }
 
@@ -205,7 +200,7 @@ class ListRepositoriesActivity : BaseActivity() {
         applyFilter(text)
 
         if (listRepositoriesChanged.isEmpty()) {
-            showCardError("Nenhum repositório encontrado!", View.GONE, View.GONE)
+            showCardError(message = "Nenhum repositório encontrado!")
         } else {
             setVisibility()
         }
@@ -227,37 +222,10 @@ class ListRepositoriesActivity : BaseActivity() {
         binding.clError.visibility = View.GONE
     }
 
-    private fun verifySavedInstanceState(savedInstanceState: Bundle?) {
-        if (savedInstanceState != null && savedInstanceState.containsKey("repositories")
-            && (savedInstanceState.getSerializable("repositories") as ArrayList<Items>).isNotEmpty()) {
-            page = savedInstanceState.getInt("page")
-            listRepositoriesNotChanged.addAll(savedInstanceState.getSerializable("repositories") as ArrayList<Items>)
-            listRepositoriesChanged.addAll(listRepositoriesNotChanged)
-            adapterRepositories.notifyDataSetChanged()
-            binding.rcList.smoothSnapToPosition(savedInstanceState.getInt("toPosition"))
-            binding.fabUp.visibility = savedInstanceState.getInt("fab")
-            binding.rcList.visibility = View.VISIBLE
-            binding.editTextSearch.visibility = View.VISIBLE
-
-        } else {
-            viewModel.getRepositories(language, page)
-        }
-    }
-
     private fun verifySharedPreferences() {
         if (getShowDialogPref()) {
             ListRepositoriesDialog.showDialog(this)
             saveShowDialogPref()
-        }
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        if (listRepositoriesNotChanged.isNotEmpty()) {
-            outState.putInt("toPosition", scrollOutItems)
-            outState.putInt("page", page)
-            outState.putSerializable("repositories", listRepositoriesNotChanged)
-            outState.putInt("fab", binding.fabUp.visibility)
         }
     }
 
@@ -289,7 +257,7 @@ class ListRepositoriesActivity : BaseActivity() {
         Handler().postDelayed({ next = true }, 3000)
     }
 
-    private fun showCardError(message: String, visibilityTryAgain: Int = View.VISIBLE, visibilityProgressBar: Int = View.VISIBLE) {
+    private fun showCardError(message: String, visibilityTryAgain: Int = View.GONE, visibilityProgressBar: Int = View.GONE) {
         binding.txtMessage.text = message
         binding.clError.visibility = View.VISIBLE
         binding.btnTryAgain.visibility = visibilityTryAgain

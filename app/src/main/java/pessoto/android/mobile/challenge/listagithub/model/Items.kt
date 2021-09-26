@@ -10,5 +10,6 @@ data class Items(
     @SerializedName("owner") val owner: Owner,
     @SerializedName("stargazers_count") val stars: Long,
     @SerializedName("forks") val forks: Long,
-    @SerializedName("html_url") val urlRepository: String
+    @SerializedName("html_url") val urlRepository: String,
+    var showLoading: Boolean = false
 ) : Serializable

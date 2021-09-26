@@ -1,17 +1,14 @@
 package pessoto.android.mobile.challenge.listagithub.feature.listRepositories.view.adapter
 
-import android.graphics.drawable.BitmapDrawable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory
 import androidx.recyclerview.widget.RecyclerView
 import com.squareup.picasso.Callback
 import com.squareup.picasso.Picasso
 import pessoto.android.mobile.challenge.listagithub.databinding.AdapterRepositoriesBinding
 import pessoto.android.mobile.challenge.listagithub.model.Items
 import pessoto.android.mobile.challenge.listagithub.util.extensions.toFormat
-import kotlin.math.max
 
 class AdapterRepositories(
     var itemsList: ArrayList<Items>,
@@ -25,38 +22,39 @@ class AdapterRepositories(
         private val binding: AdapterRepositoriesBinding,
     ) : RecyclerView.ViewHolder(binding.root) {
         fun bind(item: Items) {
+            if (item.showLoading) {
+                binding.clCard.visibility = View.GONE
+                binding.clLoading.visibility = View.VISIBLE
 
-            binding.root.setOnClickListener {
-                onClick(item)
-            }
+            } else {
+                binding.clCard.visibility = View.VISIBLE
+                binding.clLoading.visibility = View.GONE
 
-            binding.root.setOnLongClickListener {
-                onLongClick(item)
-            }
+                binding.root.setOnClickListener {
+                    onClick(item)
+                }
 
-            binding.apply {
-                txtNameRepository.text = item.name
-                txtLogin.text = item.owner.login
-                txtStars.text = item.stars.toFormat()
-                txtFork.text = item.forks.toFormat()
+                binding.root.setOnLongClickListener {
+                    onLongClick(item)
+                }
 
-                Picasso.get().load(item.owner.urlAvatar).into(imgAvatar, object : Callback {
-                    override fun onSuccess() {
-                        progressBar.visibility = View.GONE
-                        imgAvatar.visibility = View.VISIBLE
-                        val imageBitmap = (imgAvatar.drawable as BitmapDrawable).bitmap
-                        val imageDrawable =
-                            RoundedBitmapDrawableFactory.create(imgAvatar.resources, imageBitmap)
-                        imageDrawable.isCircular = true
-                        imageDrawable.cornerRadius =
-                            max(imageBitmap.width, imageBitmap.height) / 8.0f
-                        imgAvatar.setImageDrawable(imageDrawable)
-                    }
+                binding.apply {
+                    txtNameRepository.text = item.name
+                    txtLogin.text = item.owner.login
+                    txtStars.text = item.stars.toFormat()
+                    txtFork.text = item.forks.toFormat()
 
-                    override fun onError(e: Exception?) {
+                    Picasso.get().load(item.owner.urlAvatar).into(imgAvatar, object : Callback {
+                        override fun onSuccess() {
+                            progressBar.visibility = View.GONE
+                            imgAvatar.visibility = View.VISIBLE
+                        }
 
-                    }
-                })
+                        override fun onError(e: Exception?) {
+
+                        }
+                    })
+                }
             }
         }
     }
