@@ -225,7 +225,6 @@ class ListRepositoriesActivity : BaseActivity() {
     private fun setVisibility() {
         binding.rcList.visibility = View.VISIBLE
         binding.clError.visibility = View.GONE
-        binding.txtMessage.visibility = View.GONE
     }
 
     private fun verifySavedInstanceState(savedInstanceState: Bundle?) {

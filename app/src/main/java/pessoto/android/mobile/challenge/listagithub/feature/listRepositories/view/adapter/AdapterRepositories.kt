@@ -35,7 +35,7 @@ class AdapterRepositories(
             }
 
             binding.apply {
-                txtNameRepository.text = item.fullName
+                txtNameRepository.text = item.name
                 txtLogin.text = item.owner.login
                 txtStars.text = item.stars.toFormat()
                 txtFork.text = item.forks.toFormat()

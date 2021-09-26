@@ -39,7 +39,7 @@ open class BaseActivity : AppCompatActivity() {
         }
     }
 
-    override fun startActivity(intent: Intent?) {
+    override fun startActivity(intent: Intent) {
         super.startActivity(intent)
         goingToBackground = false
     }
