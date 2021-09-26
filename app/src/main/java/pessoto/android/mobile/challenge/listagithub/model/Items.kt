@@ -7,7 +7,7 @@ data class Items(
     @SerializedName("full_name") val fullName: String,
     @SerializedName("description") val description: String,
     @SerializedName("owner") val owner: Owner,
-    @SerializedName("stargazers_count") val stars: Int,
-    @SerializedName("forks") val forks: Int,
+    @SerializedName("stargazers_count") val stars: Long,
+    @SerializedName("forks") val forks: Long,
     @SerializedName("html_url") val urlRepository: String
 ) : Serializable

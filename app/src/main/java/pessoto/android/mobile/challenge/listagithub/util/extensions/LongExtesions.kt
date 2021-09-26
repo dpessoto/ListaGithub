@@ -1,6 +1,6 @@
 package pessoto.android.mobile.challenge.listagithub.util.extensions
 
-fun Int.toFormat(): String {
+fun Long.toFormat(): String {
     try {
         var suffix = ""
         var n = this.toFloat()
@@ -10,16 +10,16 @@ fun Int.toFormat(): String {
                 n /= 1000000000000L
                 suffix = "T"
             }
-            n >= 1000000000 -> {
-                n /= 1000000000
+            n >= 1000000000L -> {
+                n /= 1000000000L
                 suffix = "B"
             }
-            n >= 1000000 -> {
-                n /= 1000000
+            n >= 1000000L -> {
+                n /= 1000000L
                 suffix = "M"
             }
-            n >= 1000 -> {
-                n /= 1000
+            n >= 1000L -> {
+                n /= 1000L
                 suffix = "K"
             }
             else -> String.format("%.f", n) + suffix
