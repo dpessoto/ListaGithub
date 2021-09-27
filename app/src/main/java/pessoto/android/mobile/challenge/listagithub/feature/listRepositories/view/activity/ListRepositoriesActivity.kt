@@ -5,20 +5,17 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
-import android.view.Gravity
 import android.view.View
-import android.widget.FrameLayout
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.snackbar.Snackbar
 import pessoto.android.mobile.challenge.listagithub.databinding.ActivityListRepositoriesBinding
 import pessoto.android.mobile.challenge.listagithub.feature.listRepositories.dialog.ListRepositoriesDialog
 import pessoto.android.mobile.challenge.listagithub.feature.listRepositories.repository.ListRepositoriesRepository
 import pessoto.android.mobile.challenge.listagithub.feature.listRepositories.repository.ListRepositoriesRepositoryImpl
 import pessoto.android.mobile.challenge.listagithub.feature.listRepositories.view.adapter.AdapterRepositories
 import pessoto.android.mobile.challenge.listagithub.feature.listRepositories.viewModel.ListRepositoriesViewModel
-import pessoto.android.mobile.challenge.listagithub.model.Items
+import pessoto.android.mobile.challenge.listagithub.model.Item
 import pessoto.android.mobile.challenge.listagithub.model.Result
 import pessoto.android.mobile.challenge.listagithub.model.StateView
 import pessoto.android.mobile.challenge.listagithub.util.extensions.smoothSnapToPosition
@@ -35,8 +32,8 @@ class ListRepositoriesActivity : BaseActivity() {
     private lateinit var binding: ActivityListRepositoriesBinding
     private val PREFS_NAME = "pessoto.android.mobile.challenge.listagithub.showDialog"
     private val PREF_PREFIX_KEY = "showDialog"
-    private var listRepositoriesNotChanged = ArrayList<Items>()
-    private var listRepositoriesChanged = ArrayList<Items>()
+    private var listRepositoriesNotChanged = ArrayList<Item>()
+    private var listRepositoriesChanged = ArrayList<Item>()
     private var page = 1
     var next = true
     var currentItems = 0
@@ -60,6 +57,8 @@ class ListRepositoriesActivity : BaseActivity() {
         AdapterRepositories(listRepositoriesChanged, { itemOnClick -> }, { itemLongClick ->
             startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(itemLongClick.urlRepository)))
             return@AdapterRepositories true
+        }, {
+            viewModel.getRepositories(language, page)
         })
     }
 
@@ -108,14 +107,14 @@ class ListRepositoriesActivity : BaseActivity() {
                 if (listRepositoriesNotChanged.isEmpty()) {
                     showCardError(message = "Nenhum repositirório encontrado.\nVerifique sua conexão e tente novamente.", visibilityTryAgain = View.VISIBLE)
                 } else {
-                    showSnackBar("Verifique sua conexão, por favor")
+                    showErrorInRecylerView("Verifique sua conexão, por favor")
                 }
             }
             else -> {
                 if (listRepositoriesNotChanged.isEmpty()) {
                     showCardError(message = "Ocorreu um erro inesperado.\nPor favor, tente novamente.", visibilityTryAgain = View.VISIBLE)
                 } else {
-                    showSnackBar("Não foi possível atualizar a lista", Gravity.BOTTOM)
+                    showErrorInRecylerView("Não foi possível atualizar a lista")
                 }
             }
         }
@@ -162,10 +161,10 @@ class ListRepositoriesActivity : BaseActivity() {
     }
 
     private fun addShowLoading() {
-        val last = listRepositoriesChanged.last().copy()
-        if (!last.showLoading) {
-            last.showLoading = true
-            listRepositoriesChanged.add(last)
+        val last = listRepositoriesChanged.last()
+        if (!last.error.showLoading && !last.error.tryAgain) {
+            val error = Item.Error(showLoading = true)
+            listRepositoriesChanged.add(Item(error = error))
             adapterRepositories.notifyDataSetChanged()
         }
     }
@@ -245,16 +244,15 @@ class ListRepositoriesActivity : BaseActivity() {
         return prefs.getBoolean(PREF_PREFIX_KEY, true)
     }
 
-    private fun showSnackBar(message: String, position: Int = Gravity.TOP) {
-        val snack: Snackbar = Snackbar.make(binding.rcList, message, Snackbar.LENGTH_SHORT)
-        val view = snack.view
-        val params = view.layoutParams as FrameLayout.LayoutParams
-        params.gravity = position
-        view.layoutParams = params
-        snack.show()
-
+    private fun showErrorInRecylerView(message: String) {
         next = false
-        Handler().postDelayed({ next = true }, 3000)
+        val last = listRepositoriesChanged.last()
+        if (last.error.tryAgain || last.error.showLoading) {
+            last.error.tryAgain = true
+            last.error.showLoading = false
+            last.error.tryAgainMessage = message
+            Handler().postDelayed({ adapterRepositories.notifyDataSetChanged() }, 1000)
+        }
     }
 
     private fun showCardError(message: String, visibilityTryAgain: Int = View.GONE, visibilityProgressBar: Int = View.GONE) {

@@ -6,7 +6,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import pessoto.android.mobile.challenge.listagithub.feature.listRepositories.repository.ListRepositoriesRepository
-import pessoto.android.mobile.challenge.listagithub.model.Items
 import pessoto.android.mobile.challenge.listagithub.model.Result
 import pessoto.android.mobile.challenge.listagithub.model.ResultRepository
 import pessoto.android.mobile.challenge.listagithub.model.StateView

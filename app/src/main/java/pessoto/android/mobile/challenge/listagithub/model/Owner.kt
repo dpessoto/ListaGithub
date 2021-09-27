@@ -4,6 +4,6 @@ import com.google.gson.annotations.SerializedName
 import java.io.Serializable
 
 class Owner(
-    @SerializedName("avatar_url") val urlAvatar: String,
-    @SerializedName("login") val login: String
+    @SerializedName("avatar_url") val urlAvatar: String = "",
+    @SerializedName("login") val login: String = ""
 ) : Serializable
