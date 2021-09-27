@@ -1,5 +1,7 @@
 package pessoto.android.mobile.challenge.listagithub.feature.listRepositories.view.adapter
 
+import android.annotation.SuppressLint
+import android.os.Handler
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,8 +12,9 @@ import pessoto.android.mobile.challenge.listagithub.databinding.AdapterRepositor
 import pessoto.android.mobile.challenge.listagithub.model.Item
 import pessoto.android.mobile.challenge.listagithub.util.extensions.toFormat
 
+@SuppressLint("NotifyDataSetChanged")
 class AdapterRepositories(
-    var itemsList: ArrayList<Item>,
+    var itemList: ArrayList<Item>,
     private val onClick: (Item) -> Unit,
     private val onLongClick: (Item) -> Boolean,
     private val tryAgain: () -> Unit
@@ -74,6 +77,12 @@ class AdapterRepositories(
             binding.txtMessage.text = item.error.tryAgainMessage
             binding.btnTryAgain.setOnClickListener {
                 tryAgain()
+                val last = itemList.last()
+                if (!last.error.showLoading && last.error.tryAgain) {
+                    last.error.tryAgain = false
+                    last.error.showLoading = true
+                    notifyDataSetChanged()
+                }
             }
         }
 
@@ -91,11 +100,31 @@ class AdapterRepositories(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val item = itemsList[position]
+        val item = itemList[position]
         holder.bind(item)
     }
 
     override fun getItemCount(): Int {
-        return itemsList.size
+        return itemList.size
+    }
+
+    fun addShowLoading() {
+        val last = itemList.last()
+        if (!last.error.showLoading && !last.error.tryAgain) {
+            val item = Item()
+            item.error.showLoading = true
+            itemList.add(item)
+            notifyDataSetChanged()
+        }
+    }
+
+    fun showErrorInRecylerView(message: String) {
+        val last = itemList.last()
+        if (last.error.tryAgain || last.error.showLoading) {
+            last.error.tryAgain = true
+            last.error.showLoading = false
+            last.error.tryAgainMessage = message
+            Handler().postDelayed({ notifyDataSetChanged() }, 1000)
+        }
     }
 }

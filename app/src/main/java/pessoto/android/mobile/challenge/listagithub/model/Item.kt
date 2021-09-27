@@ -11,7 +11,7 @@ data class Item(
     @SerializedName("stargazers_count") val stars: Long = 0,
     @SerializedName("forks") val forks: Long = 0,
     @SerializedName("html_url") val urlRepository: String = "",
-    var error: Error = Error()
+    val error: Error = Error()
 ) : Serializable {
     data class Error(
         var showLoading: Boolean = false,

@@ -152,20 +152,11 @@ class ListRepositoriesActivity : BaseActivity() {
 
                     if ((currentItems + scrollOutItems > totalItems - 4) && next) {
                         next = false
-                        addShowLoading()
+                        adapterRepositories.addShowLoading()
                         viewModel.getRepositories(language, page)
                     }
                 }
             })
-        }
-    }
-
-    private fun addShowLoading() {
-        val last = listRepositoriesChanged.last()
-        if (!last.error.showLoading && !last.error.tryAgain) {
-            val error = Item.Error(showLoading = true)
-            listRepositoriesChanged.add(Item(error = error))
-            adapterRepositories.notifyDataSetChanged()
         }
     }
 
@@ -246,13 +237,7 @@ class ListRepositoriesActivity : BaseActivity() {
 
     private fun showErrorInRecylerView(message: String) {
         next = false
-        val last = listRepositoriesChanged.last()
-        if (last.error.tryAgain || last.error.showLoading) {
-            last.error.tryAgain = true
-            last.error.showLoading = false
-            last.error.tryAgainMessage = message
-            Handler().postDelayed({ adapterRepositories.notifyDataSetChanged() }, 1000)
-        }
+        adapterRepositories.showErrorInRecylerView(message)
     }
 
     private fun showCardError(message: String, visibilityTryAgain: Int = View.GONE, visibilityProgressBar: Int = View.GONE) {
