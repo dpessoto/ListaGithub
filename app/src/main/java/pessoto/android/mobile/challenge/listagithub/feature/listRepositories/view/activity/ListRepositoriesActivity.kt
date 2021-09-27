@@ -1,15 +1,14 @@
 package pessoto.android.mobile.challenge.listagithub.feature.listRepositories.view.activity
 
 import android.annotation.SuppressLint
-import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
-import android.os.Handler
 import android.view.View
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import pessoto.android.mobile.challenge.listagithub.Router
 import pessoto.android.mobile.challenge.listagithub.databinding.ActivityListRepositoriesBinding
+import pessoto.android.mobile.challenge.listagithub.feature.listRepositories.dialog.DetailRepositoryDialog
 import pessoto.android.mobile.challenge.listagithub.feature.listRepositories.dialog.ListRepositoriesDialog
 import pessoto.android.mobile.challenge.listagithub.feature.listRepositories.repository.ListRepositoriesRepository
 import pessoto.android.mobile.challenge.listagithub.feature.listRepositories.repository.ListRepositoriesRepositoryImpl
@@ -54,8 +53,10 @@ class ListRepositoriesActivity : BaseActivity() {
     }
 
     private val adapterRepositories by lazy {
-        AdapterRepositories(listRepositoriesChanged, { itemOnClick -> }, { itemLongClick ->
-            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(itemLongClick.urlRepository)))
+        AdapterRepositories(listRepositoriesChanged, { itemOnClick ->
+            DetailRepositoryDialog.showDialog(this, itemOnClick)
+        }, { itemLongClick ->
+            Router.instance.goToWeb(this, itemLongClick.urlRepository)
             return@AdapterRepositories true
         }, {
             viewModel.getRepositories(language, page)

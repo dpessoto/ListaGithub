@@ -8,13 +8,12 @@ import android.os.Build
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import android.widget.ImageButton
 import androidx.constraintlayout.widget.ConstraintLayout
+import kotlinx.android.synthetic.main.dialog_list_repositories.view.*
 import pessoto.android.mobile.challenge.listagithub.R
 
 class ListRepositoriesDialog(context: Context) : ConstraintLayout(context) {
     private lateinit var dialog: Dialog
-    private lateinit var imgClose: ImageButton
 
     init {
         init(context)
@@ -24,7 +23,6 @@ class ListRepositoriesDialog(context: Context) : ConstraintLayout(context) {
         val inflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
         inflater.inflate(R.layout.dialog_list_repositories, this)
 
-        imgClose = findViewById(R.id.imgClose)
         imgClose.setOnClickListener {
             dialog.dismiss()
         }

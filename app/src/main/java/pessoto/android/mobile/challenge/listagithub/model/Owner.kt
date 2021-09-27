@@ -5,5 +5,6 @@ import java.io.Serializable
 
 class Owner(
     @SerializedName("avatar_url") val urlAvatar: String = "",
-    @SerializedName("login") val login: String = ""
+    @SerializedName("login") val login: String = "",
+    @SerializedName("html_url") val urlOwner: String = ""
 ) : Serializable
