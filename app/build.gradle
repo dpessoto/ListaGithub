@@ -35,6 +35,9 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
+    buildFeatures {
+        viewBinding true
+    }
 }
 
 dependencies {
@@ -60,6 +63,7 @@ dependencies {
 
     //Dependencia picasso
     implementation "com.squareup.picasso:picasso:$versionPicasso"
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
 
     testImplementation "junit:junit:$versionJUnit"
     androidTestImplementation "androidx.test.ext:junit:$versionAndroidXJUnit"

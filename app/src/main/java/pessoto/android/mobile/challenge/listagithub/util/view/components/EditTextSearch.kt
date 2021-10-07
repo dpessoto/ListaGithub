@@ -14,7 +14,7 @@ import pessoto.android.mobile.challenge.listagithub.R
 import pessoto.android.mobile.challenge.listagithub.util.extensions.hideKeyboard
 
 
-class EditTextSearch : ConstraintLayout {
+class EditTextSearch : ConstraintLayout, EditTextSearchView {
 
     interface AddTextChangedListener {
         fun textChanged(text: String)
@@ -45,20 +45,20 @@ class EditTextSearch : ConstraintLayout {
         editSearch = view.findViewById(R.id.editSearch)
 
         txtCancel.setOnClickListener {
-            editSearch.text?.clear()
-            editSearch.clearFocus()
-            txtCancel.hideKeyboard()
+            hideKeyboard()
         }
 
         imgClear.setOnClickListener {
             editSearch.text?.clear()
         }
 
-        editSearch.addTextChangedListener(object : TextWatcher{
+        editSearch.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+                //TODO
             }
 
             override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+                //TODO
             }
 
             override fun afterTextChanged(edit: Editable) {
@@ -72,6 +72,12 @@ class EditTextSearch : ConstraintLayout {
                 addTextChangedListener?.textChanged(text)
             }
         })
+    }
+
+    override fun hideKeyboard() {
+        editSearch.text?.clear()
+        editSearch.clearFocus()
+        txtCancel.hideKeyboard()
     }
 
 }
