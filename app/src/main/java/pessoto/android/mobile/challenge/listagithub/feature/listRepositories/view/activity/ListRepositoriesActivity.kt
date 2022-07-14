@@ -7,6 +7,7 @@ import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import pessoto.android.mobile.challenge.listagithub.Router
+import pessoto.android.mobile.challenge.listagithub.arch.viewmodel.extensions.onStateChange
 import pessoto.android.mobile.challenge.listagithub.databinding.ActivityListRepositoriesBinding
 import pessoto.android.mobile.challenge.listagithub.feature.listRepositories.dialog.DetailRepositoryDialog
 import pessoto.android.mobile.challenge.listagithub.feature.listRepositories.dialog.ListRepositoriesDialog
@@ -63,23 +64,12 @@ class ListRepositoriesActivity : BaseActivity() {
         })
     }
 
-    private val observer = Observer<StateView<Result>> { stateView ->
-        when (stateView) {
-            is StateView.Loading -> {
-                stateLoading()
-            }
-            is StateView.DataLoaded -> {
-                stateDataLoaded(stateView)
-            }
-            is StateView.Error -> {
-                stateError(stateView)
-            }
-        }
-    }
-
     private fun stateLoading() {
         if (listRepositoriesNotChanged.isEmpty()) {
-            showCardError(message = "Carregando lista de repositórios!\nAguarde por favor...", visibilityProgressBar = View.VISIBLE)
+            showCardError(
+                message = "Carregando lista de repositórios!\nAguarde por favor...",
+                visibilityProgressBar = View.VISIBLE
+            )
         } else {
             binding.clError.visibility = View.GONE
         }
@@ -106,14 +96,20 @@ class ListRepositoriesActivity : BaseActivity() {
         when (stateView.e) {
             is UnknownHostException -> {
                 if (listRepositoriesNotChanged.isEmpty()) {
-                    showCardError(message = "Nenhum repositirório encontrado.\nVerifique sua conexão e tente novamente.", visibilityTryAgain = View.VISIBLE)
+                    showCardError(
+                        message = "Nenhum repositirório encontrado.\nVerifique sua conexão e tente novamente.",
+                        visibilityTryAgain = View.VISIBLE
+                    )
                 } else {
                     showErrorInRecylerView("Verifique sua conexão, por favor")
                 }
             }
             else -> {
                 if (listRepositoriesNotChanged.isEmpty()) {
-                    showCardError(message = "Ocorreu um erro inesperado.\nPor favor, tente novamente.", visibilityTryAgain = View.VISIBLE)
+                    showCardError(
+                        message = "Ocorreu um erro inesperado.\nPor favor, tente novamente.",
+                        visibilityTryAgain = View.VISIBLE
+                    )
                 } else {
                     showErrorInRecylerView("Não foi possível atualizar a lista")
                 }
@@ -130,9 +126,28 @@ class ListRepositoriesActivity : BaseActivity() {
         configRecyclerView()
         setClicks()
 
+        onStateChange(viewModel) {
+            state ->
+            println("")
+        }
+
         binding.editTextSearch.addTextChangedListener = addTextChangedListener()
 
-        viewModel.stateView.observe(this, observer)
+
+
+        viewModel.stateView.observe(this) { stateView ->
+            when (stateView) {
+                is StateView.Loading -> {
+                    stateLoading()
+                }
+                is StateView.DataLoaded -> {
+                    stateDataLoaded(stateView)
+                }
+                is StateView.Error -> {
+                    stateError(stateView)
+                }
+            }
+        }
         viewModel.getRepositories(language, page)
         verifySharedPreferences()
     }
@@ -222,7 +237,6 @@ class ListRepositoriesActivity : BaseActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        viewModel.stateView.removeObserver(observer)
     }
 
     private fun saveShowDialogPref() {
@@ -241,7 +255,11 @@ class ListRepositoriesActivity : BaseActivity() {
         adapterRepositories.showErrorInRecylerView(message)
     }
 
-    private fun showCardError(message: String, visibilityTryAgain: Int = View.GONE, visibilityProgressBar: Int = View.GONE) {
+    private fun showCardError(
+        message: String,
+        visibilityTryAgain: Int = View.GONE,
+        visibilityProgressBar: Int = View.GONE
+    ) {
         binding.txtMessage.text = message
         binding.clError.visibility = View.VISIBLE
         binding.btnTryAgain.visibility = visibilityTryAgain
